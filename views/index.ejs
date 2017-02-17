@@ -1,0 +1,29 @@
+﻿<% include _header %>
+<!--test code-->
+<h2>Your User Agent is:</h2>
+<h1 class="user-agent">
+    <%= userAgent %>
+</h1>
+
+<div class="container">
+    <h1>Welcome to Learn About Me!</h1>
+    <dir class="row">
+        <% users.forEach(function(user){ %>
+        <div class="col-lg-3 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="/users/<%= user.username %>">
+                        <%= user.username %>
+                    </a>
+                </div>
+                <% if(user.bio){ %>
+                <div class="panel-body">
+                    <p><%= user.bio %></p>
+                </div>
+                <%}%>
+            </div>
+        </div>
+        <% }) %>
+    </dir>
+</div>
+<% include _footer %>
