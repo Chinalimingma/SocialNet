@@ -1,0 +1,242 @@
+Models
+Backbone Models are like database gateways in the server side, their main use is to
+fetch and save data to and from a RESTful server and then provide an API to the rest
+of the application in order to handle the information. They can run general-purpose
+business logic, such as validation and data transformation, handle other server
+connections, and upload an image for a model.
+The models do not know anything about views; however, they can implement
+functionality that is useful for views. For example, you can have a view that shows
+the total of an invoice and the invoice model can implement a method that does the
+calculation, leaving the view without knowledge of the computation.
+
+ /**
+Backbone.sync module. It transforms the fetch() and save() operations into HTTP
+requests:
+fetch() is mapped as a read operation. This will make GET to the the urlRoot
+attribute with the model ID for a model or the url attribute for a collection.
+save() is mapped as a create or update operation; it depends on the isNew()
+method:
+This will be mapped as create if the model does not have an ID (isNew()
+method return true). A POST request is executed.
+This will be mapped as update if the model already has an ID (isNew() method
+returns false). A PUT request is executed.
+destroy() is mapped as a delete operation. This will make DELETE to the the
+urlRoot attribute with the model ID for a model or the url attribute for a
+collection.
+**/
+/**
+fetch() is mapped as a read operation.
+This will make GET to the the urlRoot attribute with the model ID for a model or the
+url attribute for a collection.
+• save() is mapped as a create or update operation; it depends on the isNew() method:
+    °° This will be mapped as create if the model does not have an ID (isNew() method
+       return true). A POST request is executed.
+    °° This will be mapped as update if the model already has an ID (isNew() method
+       returns false). A PUT request is executed.
+• destroy() is mapped as a delete operation.
+This will make DELETE to the the urlRoot attribute with the model ID for a model or the
+url attribute for a collection.
+**/
+/**
+Saving data to the server
+As its name suggests, save allows you to send your Model's attributes to your
+server. It does so in the JSON format, at the URL specified by the url method of
+your Model, via an AJAX POST or PUT request. Like fetch, save allows you to
+provide success and error callback options and (also like fetch) it returns a
+promise, which can be used to trigger code once the save method is completed
+**/
+/** Fetching data from the server
+The fetch method is designed to work with a RESTfulstyle API that returns just the Model's
+JSON, so if your server returns something else, such as that same JSON wrapped inside an
+envelope object, you'll need to override a special Model method called parse.
+
+When a fetch method finishes, Backbone passes the server's response through parse
+before it calls set, and the default implementation of the parse method simply returns
+the object given to it without modification. By overriding the parse method with
+your own logic, however, you can tell Backbone how to convert this response from
+whatever format the server sent it in into a Backbone attributes object.
+**/
+
+/**
+The get method is very simple; I'd actually like to show its entire source code here:
+get: function(attr) {
+    return this.attributes[attr];
+}
+
+In fact, there are two benefits of using the get method, as follows:
+• The first benefit is that using get makes your code slightly short and more
+readable as well as more consistent since your get calls will match your
+set calls.
+• The second benefit, and only a programmatic advantage, is that using get
+offers the option of future extensibility. Like many Backbone methods,
+get is not just designed for out of the box use but also for extension by
+you, the Backbone developer.
+
+/**
+The model set method has two forms or signatures. The first takes two
+arguments: one for the data's key and one for its value. This form is great if you
+only want to set one value at a time, but if you need to set multiple values, you can
+use the second form instead, which takes only a single argument containing all the
+values of set:
+contact.set({phones: phonesData, emails: emailData});
+**/
+/**
+Models also have an unset method, which takes only a single key
+argument and works in a similar way as JavaScript's delete statement, except
+that it also lets any code listening to the Model known about the change:
+**/
+**/
+//Backbone won't know that the server-side endpoint for a Contact Model will be /contacts 
+//unless you tell it, which you can do by specifying a urlRoot property. If, for some reason, your server-side API is on a different domain, you can also use
+//urlRoot method to specify an entirely different domain.
+/**
+For instance, let's say our book Models have a fiction attribute and we want to
+use two different endpoints to save our contacts:/friend for contacts friends and /
+family for family people. We can override our url method to tell Backbone as much, 
+as shown here:
+    var Contact = Backbone.extend({
+    url: function() {
+        if (this.get('friend')) {
+            return '/friend;
+            } else {
+            return '/family';
+            }
+        }
+    });
+    var theFriend = new Book({friend: true});
+    alert(theFriend.url()); // alerts "/friend"
+**/
+
+	// new Contact().save(); will initiate a PUT request to "/contacts"
+
+    /**
+
+    var Contact = Backbone.Model.extend({
+        //defaults ??????????????????? ?????????????????
+		//?????????
+		defaults: {publisher: 
+		{name: 'Packt Publishing'}, //new Contact.attributes.publisher.name
+                name: '',			//new Contact.attribute.name
+                ......
+                avatar: null
+        }
+    });
+    **/
+
+/**p38
+The preceding code reveals another problem: it will only work if our server is set up to
+receive all of the Model's attributes in the JSON format. If we want to save only some
+of those attributes or if we want to send other JSON, such as a wrapping envelope
+object, Backbone's save method won't work out of the box. Fortunately, Backbone
+provides a solution in the form of its toJSON method. When you save, Backbone passes
+your Models attributes through toJSON, which (like parse) normally does nothing,
+because by default toJSON simply returns whatever is passed in to it.
+
+However, by overriding toJSON, you can gain complete control over what Backbone
+sends to your server. 
+**/
+/**
+parse(){}//Receive from Server, correspond to fetch method
+
+When a fetch method finishes, Backbone passes the server's response through parse
+before it calls set, and the default implementation of the parse method simply returns
+the object given to it without modification. By overriding the parse method with
+your own logic, however, you can tell Backbone how to convert this response from
+whatever format the server sent it in into a Backbone attributes object.
+For instance, let's say that instead of returning the data for a contact directly, your
+server returned an object with the contact's attributes contained inside a contact key,
+as shown here:
+    {
+        contact: {
+            email: 'eric@hotmail.com',
+            name: 'eric'
+        },
+        otherInfo: 'stuff we don't care about'
+    }
+
+By overriding the parse method of our Contact class, we can tell Backbone to throw out
+the otherInfo and just use the Contact property as our contact's attribute:
+    var Contact = Backbone.Model.extend({
+        parse: function(response) {
+            return response.contacts;  // Backbone will call this.
+            set(response.contacts);    //set contact's attribute
+        }
+    });
+
+validate(){} //Send anything to the server, correspond to save method
+The validate method is called every time you save, but its default implementation simply
+returns true. If you overwrite it, however, you can add whatever validation logic you want,
+and if that logic returns false, then the whole save operation will fail and also return 
+false.
+
+	var Contact = Backbone.Model.extend({
+		validate: function(attributes) {
+			var isValid = this.get('name').length >= 5;
+			return isValid;
+		}
+	});
+	var tooShort = new Contact({name: eric});
+	var wasAbleToSave = tooShort.save(); // == false
+
+//Note that if the validation fails, Backbone will not even return a promise; it will just 
+return false.
+Instead, you should use the following code snippet:
+	var savePromise = tooShort.save();
+		if (savePromise) {
+			savePromise.done(function() {
+				// this code will be reached if both the validation and AJAX call succeed
+			}).fail(function() {
+				// this code will be reached if the validation passes but the AJAX fails
+			});
+		} else {
+			// this code will be reached if the validation fails
+		}
+//Note that you can also check the validity of your Models at any time by using the isValid
+//method, which will only return the validation result (and not save).
+**/
+
+/**
+• Use Model, Backbone's main class to work with data
+• Create new Model subclasses
+• Get and set Model attributes and trigger other code when these attributes change
+• Store these attributes to a remote server and retrieve them from the server
+• Use the several convenience methods that Model has borrowed from Underscore
+
+In this chapter, we explored Backbone's Model class. You learned how to use get and
+set to change attributes, how to use on and off to listen for events, and how to use
+fetch, save, and destroy to exchange data with a remote server. You also learned
+how you can customize Backbone to handle your server's API by modifying the url,
+urlRoot, and idAttribute properties and how to handle differently structured data
+with parse and toJSON.
+
+Core functionality of Model		---Send or Retrieve data to/from the server
+get set unset					---attributes
+constructor / initialize		--property
+id idAttribute cid
+defaults						---attributes
+fetch							---urlRoot--- parse
+save							---validate ---toJSON
+destroy
+
+The Underscore functionality of Model
+Name        What it does
+keys        This returns every attribute key
+values      This returns every attribute value
+pairs       This returns an array of attribute key/value pairs
+invert      This returns the attributes with keys and values switched; for
+            instance, an attribute of {'pages': 20} will become {'20':
+            'pages'}
+pick        This returns both the keys and values of only the specified
+            attributes; for instance, book.pick('pages') will return
+            {pages: 20} without any title or other attributes
+omit        This returns both the keys and values for every attribute
+            except those specified; for instance, book.omit('pages')
+            will return {title: 'Short Title'}
+
+**/
+
+//any object you provide in defaults will be shared with, not copied between, 
+instances of your Model class
+
+//the model builds the endpoint from its own data so that the view is decoupled of
+// any server connection

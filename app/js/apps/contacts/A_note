@@ -1,0 +1,7 @@
+Contacts subapplication
+The subapplication should be able to list all the available contacts
+in RESTful API and provide the mechanisms to show and edit them.
+
+The subapplication starts when the Application infrastructure is loaded in the browser
+and the start() method on it is called(The responsibility of main.js). It will bootstrap all the common components
+and then instantiate all the available routers in the subapplications

@@ -1,0 +1,25 @@
+Subapplication controller
+A controller acts like an air traffic controller for views, models, and collections. When
+given a Backbone data object, it will instantiate and render the appropriate views
+and then coordinate them. On complex layouts, it is not an easy task to coordinate
+the views with the models and collections.
+The Business logic for the use cases should be implemented here. The subapplication
+controller implements a mediator pattern, allowing other basic objects such as views
+and models keep it simple and loose coupling.
+Due to loose coupling reasons, a view should not directly call to methods or events
+of other views. Instead of this, a view triggers events and the controller handles the
+event and orchestrates the views behavior if necessary. Note how views are isolated,
+handling just its owned portion of DOM and triggering events when required to
+communicate something.
+
+	• It creates all the necessary views with the model or collection that is passed
+    • It renders the views in a region of the DOM
+    • It listens for events in the views
+
+/**
+ * The subapplication controller coordinates the models/collections and how they are
+shown. The controller can instruct the Application infrastructure to show a loading
+message while the data is fetched and when it's done, the controller can build the
+necessary views with the models and collections that are recently fetched in order to
+show them in the DOM.
+ */

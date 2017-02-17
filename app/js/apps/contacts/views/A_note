@@ -1,0 +1,330 @@
+Views
+Note how views are isolated, handling just its owned portion of DOM and triggering events 
+when required to communicate something.
+
+The only responsibilities of views are to handle the Document Object Model (DOM)
+and listen for low-level events (jQuery/DOM events), and transform them into domain
+ones. The Backbone Views works closely with template engines in order to create
+markups that represent the information that is contained in models and collections.
+Views abstract the user interactions, transforming their actions into business value
+data structures for the application. For example, when a click event is triggered from
+a Save button in the DOM, the view should transform the event into something
+similar to a save:contact event using Backbone Events with the data written in the
+form. Then, a domain-specific object can apply some business logic to the data and
+show a result.
+It is a rule that business logic on views should be avoided; however, basic form
+validations such as accept only numbers are allowed. Complex validations should
+still be done on the model or the controller.
+
+view.el
+Views wrap a DOM element inside a property called el. 
+
+Views take only a single options argument when instantiated. The most important part of
+these options is the el property, which defines the DOM element that the View will
+wrap as its el. A View's el option can be defined in one of the following three ways:
+	• HTML (new Backbone.View ({el: <div id='foo'></div>}))
+	• jQuery Selector (new Backbone.View ({el: '#foo'}))
+	• DOM element (new Backbone.View ({el: document.getElementById('foo')}))
+
+You can also choose not to provide an el option, in which case Backbone will create
+the View's el option for you. By default, Backbone will simply create an empty DIV
+element (<div></div>), although you can change this by providing other options
+when you create your view. You can provide the following options:
+	• tagName: This changes the generated elements' tag from div to the specified value
+	• className: This specifies the HTML class attribute that the element should have
+	• id: This specifies the HTML id attribute that the element should have
+	• attributes: This specifies the HTML attributes that the element should have
+
+Backbone's default implementation, as follows:
+    render: function() {
+            return this;
+    }
+As you can see, the default render method doesn't actually render anything. This is
+because different Views can have entirely different content, so it doesn't make sense
+for Backbone to provide only one way of generating that content. Instead, Backbone
+leaves the implementation of your View's render method entirely up to you.
+
+Backbone also provides another convenient shortcut when you want to access
+elements inside a View's element: the $ method. When you use this method, it's
+effectively the same as calling jQuery's find method from the View's element.
+Because the search for the element is localized to only look through the View's el
+element and not through the entire page's DOM, it will perform much better than
+a global jQuery selection.
+For example, if you create a View of a <form> element with an <input> element
+inside it, you can use the View's $ method to access the <input> element ,
+as shown here:
+    var formView = new Backbone.View({
+        form><input value="foo" /></form>'
+    });
+    var $input = formView.$('input');
+    $input.val(); // == "foo"
+
+A brief aside on $Variable names
+When working with jQuery objects in Backbone (or even just in JavaScript, in
+general), it may often be difficult to tell whether a given variable refers to a View
+element or to its el element. In order to avoid confusion, many programmers
+(including the authors of both Backbone and jQuery) preface any variable that
+points to a jQuery object with the $ symbol, as follows:
+	var fooForm = new Backbone.View({id: 'foo', tagName: 'form'});
+	var $fooForm = fooForm.$el;
+While this practice is certainly not necessary to use Backbone, adopting it will likely
+save you from confusion in the future.
+
+Simple templating
+The first, and perhaps the most obvious, approach for rendering is to use a simple,
+logic-less templating system. The render method provided in the Backbone
+documentation is a perfect example of this, as it relies on the Underscore
+library's template method:
+    render: function() {
+        this.$el.html(this.template(this.model.toJSON()));
+        return this;
+    }
+The template method takes a string, which contains one or more specially designated
+sections, and then combines this string with an object, filling in the designated
+sections with that object's values.This is best explained with the following example:
+    var author ={
+        firstName: 'Isaac',
+        lastName: 'Asimov',
+        genre: 'science-fiction'
+    };
+    var templateString = '<%= firstName %> <%= lastName %> was a '+'great <%= genre %> author.';
+    var template = _.template(templateString);
+    alert(template(author));
+    // will alert "Isaac Asimov was a great science-fiction author."
+
+Advanced templating
+Instead of using Underscore's template method, you can also employ one of
+the many quality third-party templating libraries available, such as Handlebars,
+Mustache, Hamljs, or Eco. All these libraries offer the same basic ability to combine a
+data object with a template string, but they also offer the possibility to include logic
+inside the template.
+
+Logic-based
+Instead of relying on templating libraries, another option is to use Backbone's View
+logic, jQuery methods, and/or string concatenation to power your render methods.
+For instance, you can reimplement the preceding AuthorView without using
+templates at all:
+	var AuthorView = Backbone.View.extend({
+		render: function() {
+			var h1View = new Backbone.View({tagName: 'h1'});
+			var emView = new Backbone.View({tagName: 'em'});
+			emView.text(this.model.get('genre'));
+			h1View.$el.html(this.model.get('firstName') + ' ' + this.model.get('lastName') + ' was a ');
+			h1View.$el.append(emView.el, ' author.');
+			this.$el.html(h1View.el);
+			return this;
+		}
+	});
+
+The combined approach
+All three preceding approaches have advantages and disadvantages, and rather
+than settling for just one, you can choose to combine some of them instead. There's
+no reason why, for instance, you can't use a templating system (either Underscore's
+for simplicity or an external one for power) and then switch to using logic when
+you want to do something that doesn't fit neatly into a template.
+
+Child views
+Very often, in Backbone, you will want to create one View for a container element,
+such as a <ul> element, and another View for its child elements, such as its <li>
+element. When creating these child Views, you can either choose to have a child
+View create the child elements, or you can have the parent View create them and
+pass a jQuery selector as the child View's el element, as shown here:
+    var ListView1 = Backbone.View.extend({
+        render: function() {
+            this.$el.append(new ListItemView().render().el);
+        }
+    });
+
+    var ListView2 = Backbone.View.extend({
+        render: function() {
+            this.$el.append('<li>');
+            new ListItemView({el: this.$('li')}).render();
+        }
+    });
+
+The primary advantage of generating the child element in the View is encapsulation.
+By taking this approach, you can keep all the logic related to the child element within
+the child View. This will make the code easier to work with, as you won't have to
+think about both the child and parent Views at the same time.
+On the other hand, when you are using templates, it may be inconvenient to split
+the template into parts in order to render the overall container element. Also,
+rendering the child elements in the parent view provides a good separation between
+DOM-generating Views and purely event handling Views, which can help you
+to sort your logic better.
+Neither approach has to be taken to the extreme. While you can have a single page
+View with a single template for all your content or you can have every single child
+View generate its DOM elements, you can also choose to have a mix of approaches
+in your Views. In fact, unless you want to have a single page template for a top-level
+render, which generates the entire DOM, you will probably want to take a combined
+approach, so the real question is how much do you want to rely on each technique?
+The more you rely on the parent View, the easier it is to see the big picture; but the
+more you rely on DOM generation in child Views, the easier it will be to encapsulate
+your logic.
+
+Return value – this or this.$el
+The sample render method from the Backbone documentation returns this when it
+completes. This approach allows you to easily access the el property of the render by
+simply calling it on the render method's return value, as follows:
+	var ViewThatReturnsThis = Backbone.View.extend({
+		render: function() {
+		// do the rendering
+		return this;
+		}
+	});
+
+	var childView = new ViewThatReturnsThis();
+	parentView.$el.append(childView.render().$el);
+
+However, you can make it even easier to access the View's el by returning that el
+instead of this:
+	var ViewThatReturns$el = Backbone.View.extend({
+		render: function() {
+			// do the rendering
+		return this.$el;
+		}
+	});
+	var childView = new ViewThatReturns$el();
+	parentView.$el.append(childView.render());
+The downside of returning the $el from a render method is that you can no longer
+chain other View methods from the return value of the render method:
+	parentView.$el.append(childView.render().nextMethod());// won't work
+So, what this choice really comes down to is how much you plan to post-render your
+Views and how much you plan to call those post-rendering methods from outside
+the View itself (if you call them from within the render method, their return values
+are irrelevant). If you're not sure, the safest bet is to follow the render method in
+Backbone's documentation and return this, as it offers maximum flexibility (at the
+cost of a slightly less-concise code).
+
+/**
+Views are the core of Backbone-powered sites
+On the web, this means that you have a combination of DOM elements (to display information to the
+user) and event handlers (to receive input from the user). In Backbone, both of these things are
+managed by Views;
+Views wrap a DOM element inside a property called el
+
+• Create new View classes and instances
+    Views take only a single options argument when instantiated. The most important part of
+    these options is the el property, which defines the DOM element that the View will
+    wrap as its el. A View's el option can be defined in one of the following three ways:
+		• HTML (new Backbone.View ({el: <div id='foo'></div>}))
+		• jQuery Selector (new Backbone.View ({el: '#foo'}))
+		• DOM element (new Backbone.View ({el: document.getElementById('foo')}))
+
+    You can also choose not to provide an el option, in which case Backbone will create
+    the View's el option for you. By default, Backbone will simply create an empty DIV
+    element (<div></div>), although you can change this by providing other options
+    when you create your view. You can provide the following options:
+		• tagName: This changes the generated elements' tag from div to the specified value
+		• className: This specifies the HTML class attribute that the element should have
+		• id: This specifies the HTML id attribute that the element should have
+		• attributes: This specifies the HTML attributes that the element should have
+
+• Use Views to render DOM elements
+    when you try to use the render method of an unmodified View, you
+    quickly notice a problem with Backbone's default implementation, as follows:
+        render: function() {
+            return this;
+        }
+    As you can see, the default render method doesn't actually render anything. This is
+    because different Views can have entirely different content, so it doesn't make sense
+    for Backbone to provide only one way of generating that content. Instead, Backbone
+    leaves the implementation of your View's render method entirely up to you.
+
+Accessing a View's el element
+    Once you've created a View, you can access the element that it wraps at any time
+    by referring to its el property. You can also access a jQuery-wrapped version of
+    the same element by referring to the View's $el property. Take an example of the
+    following code:
+        var formView = new Backbone.View({tagName: 'form'});
+        formView.$el.is('form'); // returns true
+
+    Backbone also provides another convenient shortcut when you want to access
+    elements inside a View's element: the $ method. When you use this method, it's
+    effectively the same as calling jQuery's find method from the View's element.
+    Because the search for the element is localized to only look through the View's el
+    element and not through the entire page's DOM, it will perform much better than
+    a global jQuery selection.
+
+    For example, if you create a View of a <form> element with an <input> element
+    inside it, you can use the View's $ method to access the <input> element ,
+    as shown here:
+		var formView = new Backbone.View({
+			el: '<form><input value="foo" /></form>'
+		});
+		var $input = formView.$('input');
+		$input.val(); // == "foo"
+A brief aside on $Variable names
+    When working with jQuery objects in Backbone (or even just in JavaScript, in
+    general), it may often be difficult to tell whether a given variable refers to a View
+    element or to its el element. In order to avoid confusion, many programmers
+    (including the authors of both Backbone and jQuery) preface any variable that
+    points to a jQuery object with the $ symbol, as follows:
+		var fooForm = new Backbone.View({id: 'foo', tagName: 'form'});
+		var $fooForm = fooForm.$el;
+    While this practice is certainly not necessary to use Backbone, adopting it will likely
+    save you from confusion in the future.
+
+• Connect Views to Models and Collections
+    the imaginary render method passes the output of the Model's toJSON to the View's templating
+    system, presumably so that the templating system can use the Model's attributes to render the
+    View.
+
+• Respond to DOM events using Views
+    When you instantiate a View, Backbone calls a delegateEvents method, which
+    checks the events property, binds all the handlers found in it, and then creates
+    listeners for the appropriate events using jQuery. There is also a corresponding
+    undelegateEvents method, which can be used to remove all the event handlers.
+    Normally, you won't need to call either of these methods yourself because
+    Backbone will call them for you.
+    However, if you change a View's el element without telling Backbone (for example,
+    yourView.el = $('#foo')[0]), Backbone won't know that it needs to hook up the
+    events to the new element, and you will have to call delegateEvents yourself.
+    Alternatively, instead of changing a View's el element manually and then calling
+    delegateEvents afterwards, you can use a View's setElement method to do both
+    at the same time
+
+• Decide the rendering style(s) that best fits your project
+
+Region
+A common use case is to swap between views in a common DOM element; this
+can be done by using the same el property in both views and calling the render()
+method on the view you want to see. But this way doesn't clean the memory and
+event bindings because both views will remain live in memory, even if they are not
+in the DOM.
+A particularly useful scenario is when you need to switch between sub-applications,
+because sub-applications are rendered in the same DOM element normally. For
+example, when a user wants to edit contact information, he/she will click on an Edit
+button, and the current view will be replaced with an edit form.
+
+To switch between views, a Region class could be used as shown next:
+	var mainRegion = new Region({el: '#main'});
+	var contactViewer = new ContactViewer({model: contact});
+	contactViewer.on('edit:contact', function(contact) {
+		var editContact = new EditContactView({ model: contact });
+		mainRegion.show(editContact);
+	});
+	mainRegion.show(contactViewer);
+The Region object points to an existing DOM element; to show a view on that
+element, the show() method should be called on the Region object. Note that views
+don't have the el property set because regions will put the element in the DOM
+and not the View itself. This gives us an extra feature, views don't need to set an el
+property anymore and can be rendered on any available region.
+
+??Region???el??????view????class??container
+
+An implementation of this example could be something like this:
+	var AppLayout = new Layout({
+		template: $('#app-layout').html(),
+		regions: {
+			header: 'header',
+			sicebar: '#sidebar',
+			footer: 'footer',
+			main: '#main'
+		}
+	});
+	Var layout = new AppLayout({ el: 'body' });
+	var header = new HeaderView();
+	layout.render();
+	layout.getRegion('header').show(header);
+**/
+

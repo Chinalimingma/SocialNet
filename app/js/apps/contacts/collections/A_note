@@ -1,0 +1,147 @@
+Collections
+You can think of Backbone Collections as a container of a set of Backbone Models, for
+example, a Collection of Contacts models. With a model, you can only fetch a single
+document at time; however, Collections allow us to fetch lists of Models.
+A big difference from Models is that Collections should be used as read-only, they
+fetch the data but they should not write in the server; also it is not usual to see
+business logic here.
+Another use for Collection is to abstract RESTful APIs responses as each server has
+different ways to deal with a list of resources. For instance, while some servers accept
+a skip parameter for pagination, others have a page parameter for the same purpose.
+Another case is on responses, a server can respond with a plain array, while others
+prefer to send an object with a data, list, or other key, where the array of objects
+is placed. There is no standard way. Collections can deal with these issues, making
+server requests transparent for the rest of the application.
+
+/*
+    //Backbone can automatically sort all Models added to a Collection if you tell it to by specifying a comparator.
+    get comparator() {
+        return 'name';
+    }
+
+    The final form of comparator is a function that takes two Model arguments and
+    returns a number, indicating whether the first argument should come before (-1)
+    or after (1) the second. If there is no preference as to which Model should come first,
+    the function will return 0.
+    */
+/**
+• Create new Collection subclasses
+    Just as a Model wraps an object and provides additional functionality, Collections wraps an array
+    and offers several advantages over using the array directly:
+    • Collections uses Backbone's class system, making it easy to define methods, create subclasses,
+      and so on
+    • Collections allows other code to listen for and respond when Models are added or removed from
+      that Collection or when Models in a Collection are modified
+    • Collections simplifies and encapsulates the logic for communicating with the server
+
+• Add and remove Models from a Collection
+    Adding to and resetting Collections
+    • push • pop • unshift • shift • slice
+    The •at method takes a zero-based index and returns the Model at that index
+
+• Trigger other code in response to changes in the Collection
+    Events
+    Just as with Models, Collections have on and off methods, which can be used to trigger logic
+    when certain events occur in their Collection.
+
+    Event name  Trigger
+    add         When a Model or Models is/are added to the Collection
+    remove      When a Model or Models is/are removed from the Collection
+    reset       When the Collection is reset (replace)
+    sort        Whenever the Collection is sorted (typically after an add/remove)
+    sync        When an AJAX method of the Collection has completed
+    error       When an AJAX method of the Collection returns an error
+    invalid     When validation triggered by a Model's save/isValid call fails
+
+    Collections, such as Models, also have a special all event, which can be used
+    to listen for any event occurring on the Collection. In addition, the on method
+    of a Collection can also be used to listen for any Model events triggered by the
+    Models in the Collection
+
+• Store and retrieve Collections of Models to and from a remote server
+    Server-side actions
+    Just as with Models, Collections have a fetch method that retrieves data from
+    the server and a save method to send data to the server. One minor difference,
+    however, is that by default, a Collection's fetch will merge any new data from
+    the server with any data it already has. If you prefer to replace your local data
+    with server data entirely, you can pass a {reset: true} option when you fetch.
+    Collections also have the url, parse, and toJSON methods that control how
+    fetch/save work.
+
+• Sand index the Models of a Collection
+    Sorting
+    Backbone can automatically sort all Models added to a Collection if you tell it
+    to by specifying a comparator. As with a model, a Collection's comparator can be
+    provided as an option when the Collection class is created
+
+    The comparator itself can come in three forms:
+    •The first and simplest form is the name of an attribute of the Models in the Collection.
+    If this form is used, Backbone will sort the collection based on the values of the specified
+    attribute
+    •The second form of comparator is a function that takes a single argument. If this
+    form is used, Backbone will pass any Models it is trying to sort to this function one
+    at a time and then use whatever value is returned to sort the Model.
+    •The final form of comparator is a function that takes two Model arguments and
+    returns a number, indicating whether the first argument should come before (-1)
+    or after (1) the second. If there is no preference as to which Model should come first,
+    the function will return 0.
+
+• Take advantage of the the convenience methods borrowed from Underscore
+    Name        What it does
+
+    each        This iterates over every Model in the Collection
+    map         This returns an array of values by transforming every Model in the Collection
+    pluck       This returns the provided attribute from each Model in the Collection
+    reduce      This returns a single value generated from all the Models in a Collection
+    reduceRight The same as reduce, except that it iterates backwards find This returns the first
+                Model that matches a testing function
+//Testing methods---Several of the remaining methods focus on testing the Collection to see whether
+//it passes a certain type of test.
+
+//The contains and isEmpty methods allow you to check whether the Collection contains a specified
+//Model or Models or whether it contains any models at all
+    contains    This returns true if the Collection includes the provided Model
+    isEmpty     This returns true if the Collection contains no Models
+
+//every and some methods, which allow you to specify your own test logic
+    every       This returns true if every Model in the Collection matches a test function
+    some        This returns true if some (any) Model in the Collection matches a test function
+
+//Extraction methods --Another way in which several of the Underscore methods can be used is by
+//extracting a specific Model or Models from a Collection. The simplest way to do this is with
+//the where and findWhere methods, which return all the (or in the case of findWhere, the first)
+//Models that match a provided attributes object.
+    where       This returns all the Models in the Collection that match the provided attribute
+                template
+    findWhere   This returns the first Model found in the Collection that matches the provided
+                attribute template
+    filter      This returns all the Models that match a testing function
+    reject      This returns all the Models that don't match a testing function
+
+//Ordering methods---we have toArray, sortBy, and groupBy, all of which allow you to get an array
+//of all the Models stored in a Collection. However, while toArray simply returns all
+//the Models in the Collection, sortBy returns Models sorted by a provided criteria, and
+//groupBy returns Models grouped into a further level of arrays.
+    sortBy      This returns the Collection's Models sorted based on an indicated attribute
+    groupBy     This returns the Collection's Models grouped by an indicated attribute
+    shuffle     This returns one or more randomly chosen Models from the Collection
+    toArray     This returns an array of the Collection's Models
+    
+    invoke      This calls a specified function on every Model in the Collection and returns the
+                result
+    max         This applies a conversion function to every Model in the Collection and returns
+                the maximum value returned
+    min         This applies a conversion function to every Model in the Collection and returns
+                the minimum value returned    
+    size        This returns a count of Models in the Collection, such as Collection.length
+    first       This returns the first (or first N) Model(s) in the Collection
+    initial     This returns all but the last Model in the Collection
+    rest        This returns all the Models in the Collection after the first N
+    last        This returns the last (or last N) Model(s) in the Collection
+    without     This returns all the Models in the Collection except the provided ones
+    indexOf     This returns the index of the first provided Model in the Collection
+    lastIndexOf This returns the index of the last provided Model in the Collection    
+    chain       This returns a version of Collection that can have multiple Underscore methods
+                called on it successively (chained); call the value method at the end of the chain
+                to get the result of the calls
+**/
