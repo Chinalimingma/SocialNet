@@ -1,0 +1,18 @@
+{
+  "username": "eric",
+  "password": "123456789",
+  "displayName": "Eric Ma",
+  "bio": "This is a eric's biography"
+}, {
+  "username": "Eric",
+  "password": "1234567890",
+  "createdAt": "2016.12.30",
+  "displayName": "Eric Ma",
+  "bio": "This is eric biography"
+}, {
+  username: "Liming",
+  password: "1234567890",
+  createdAt: "2016.12.30",
+  displayName: "Liming Ma",
+  bio: "This is liming biography"
+}

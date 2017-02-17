@@ -1,0 +1,86 @@
+{
+  "user1": {
+    "name": "John   Doe',",
+    "bio": "this a john bio",
+    "phones": [
+      {
+        "description": "home",
+        "phone": "(333) 364 27364"
+      },
+      {
+        "description": "mobile",
+        "phone": "(001)123456789"
+      }
+    ],
+    "emails": [
+      {
+        "description": "personal",
+        "email": "john.doe@example.com"
+      },
+      {
+        "description": "work",
+        "email": "john.doe@acme.com"
+      }
+    ],
+    "address1": "Cuarzo Street 2369",
+    "facebook": "https: //www.facebook.com/John.Doe",
+    "twitter": "https: //twitter.com/thejanedoe",
+    " github": "https: //github.com/abiee",
+    "avatar": {
+      "file": "cat.jpg",
+      "url": "img/cat.jpg"
+    }
+  },
+  "user2": {
+    "name": "Stephen Statler",
+    " bio": "Stephen Statler is a writer",
+    "emails": [
+      {
+        "description": "personal",
+        "email": "jane.doe@example.com"
+      }
+    ],
+    "address1": "Tortilla",
+    "Street": "364",
+    "facebook": "https: //www.facebook.com/John.Doe",
+    "twitter": "https: //twitter.com/thejanedoe",
+    "avatar": {
+      "file": "cat3.jpg",
+      "url": "img/cat3.jpg"
+    }
+  },
+  "user3": {
+    "name": "Abiee Alejandro",
+    "bio": "Abiee said: Frontend architecture is a collection of tools and processes",
+    "emails": [
+      {
+        "description": "personal",
+        "email": "abiee@echamea.com"
+      }
+    ],
+    "address1": "Cuarzo 2369",
+    "facebook": "https: //www.facebook.com/abiee.alejandro",
+    "twitter": "https: //twitter.com/AbieeAlejandro",
+    "github": "https: //github.com/abiee",
+    "avatar": {
+      "file": "cat4.jpg",
+      "url": "img/cat4.jpg"
+    }
+  },
+  "user4":
+  {
+    "name": "Omare",
+    "bio": "An architect is defined as someone who designs plans",
+    "email": [
+      {
+        "description": "personal",
+        "email": "me@omar-e.com"
+      }
+    ],
+    "address1": "Del Árbol street 1234",
+    "avatar": {
+      "file": "cat5.jpg",
+      "url": "img/cat5.jpg"
+    }
+  }
+}
