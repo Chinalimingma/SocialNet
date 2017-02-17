@@ -1,0 +1,11 @@
+Models offer three major advantages:
+•
+Models use Backbone's class system, making it easy to define methods,
+create subclasses, and so on
+•
+Models allow other code to listen for and respond to changes in the
+Model attributes
+•
+Models simplify and encapsulate the logic used to communicate with
+the server
+
